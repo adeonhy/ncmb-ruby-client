@@ -4,26 +4,26 @@ module NCMB
     
     def initialize(name, fields = {}, alc = "")
       @@name    = name
-      @@alc     = alc
-      @@fields  = fields
+      @alc     = alc
+      @fields  = fields
       @@queries = {}
       @@items   = nil
     end
     
     def columns
-      @@fields.keys
+      @fields.keys
     end
     
     def method_missing(name)
-      if @@fields[name.to_sym]
-        return @@fields[name.to_sym]
+      if @fields[name.to_sym]
+        return @fields[name.to_sym]
       else
         raise NoMethod, "#{name} is not found"
       end
     end
     
     def call(name)
-      @@fields[name.to_sym] || NoMethod
+      @fields[name.to_sym] || NoMethod
     end
     
     def each(&block)
