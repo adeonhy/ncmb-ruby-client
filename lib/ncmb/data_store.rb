@@ -94,9 +94,10 @@ module NCMB
     end
     
     def post(queries = {})
-      path = "/#{@client.api_version}/classes/#{@@name}"
-      result = @client.post path, queries
-      NCMB::DataStore.new(client, name, result)
+      path = "/#{@@client.api_version}/classes/#{@@name}"
+      result = @@client.post path, queries
+      result
+#       NCMB::DataStore.new(client, name, result)
     end
   end
 end
