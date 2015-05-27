@@ -1,13 +1,15 @@
 module NCMB
   class DataStore
     include NCMB
+
+    attr_reader :items, :fields
     
     def initialize(name, fields = {}, alc = "")
-      @@name    = name
+      @name    = name
       @alc     = alc
       @fields  = fields
-      @@queries = {}
-      @@items   = nil
+      @queries = {}
+      @items   = nil
     end
     
     def columns
@@ -27,57 +29,57 @@ module NCMB
     end
     
     def each(&block)
-      (@@items || get(@@queries)).each(&block)
+      (@items || get(@queries)).each(&block)
     end
     
     def each_with_index(&block)
-      (@@items || get(@@queries)).each_with_index(&block)
+      (@items || get(@queries)).each_with_index(&block)
     end
     
     def order(field)
-      @@queries[:order] = field
+      @queries[:order] = field
       self
     end
     
     def first
-      return @@items.first unless @@items.nil?
+      return @items.first unless @items.nil?
       get().first
     end
     
     def limit(count)
-      @@queries[:limit] = count
+      @queries[:limit] = count
       self
     end
     
     def count(count)
-      @@queries[:count] = count
+      @queries[:count] = count
       self
     end
     
     def skip(count)
-      @@queries[:skip] = count
+      @queries[:skip] = count
       self
     end
     
     def where(params = {})
-      @@queries[:where] = [] unless @@queries[:where]
+      @queries[:where] = [] unless @queries[:where]
       if params.size == 1
-        @@queries[:where] << params
+        @queries[:where] << params
       else
         params.each do |hash|
-          @@queries[:where] << hash
+          @queries[:where] << hash
         end
       end
       self
     end
     
     def [](count)
-      return @@items[count] unless @@items.nil?
+      return @items[count] unless @items.nil?
       get()[count]
     end
     
-    def get(queries = @@queries)
-      path = "/#{@@client.api_version}/classes/#{@@name}"
+    def get(queries = @queries)
+      path = "/#{@@client.api_version}/classes/#{@name}"
       results = @@client.get path, queries
       return [] unless results
       if results[:error] && results[:error] != ""
@@ -88,16 +90,23 @@ module NCMB
       results[:results].each do |result|
         alc = result[:acl]
         result.delete(:acl)
-        items << NCMB::DataStore.new(@@name, result, alc)
+        items << NCMB::DataStore.new(@name, result, alc)
       end
-      @@items = items
+      @items = items
     end
     
     def post(queries = {})
-      path = "/#{@@client.api_version}/classes/#{@@name}"
+      path = "/#{@@client.api_version}/classes/#{@name}"
       result = @@client.post path, queries
       result
 #       NCMB::DataStore.new(client, name, result)
     end
+
+    def delete
+      path = "/#{@@client.api_version}/classes/#{@name}/#{@fields[:objectId]}"
+      result = @@client.delete path
+      result
+    end
+
   end
 end
